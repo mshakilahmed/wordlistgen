@@ -1,4 +1,5 @@
 <script>
+	import { Footer, FooterCopyright } from 'flowbite-svelte';
 	import '../app.postcss';
 	import Header from './Header.svelte';
 	import './styles.css';
@@ -11,9 +12,9 @@
 		<slot />
 	</main>
 
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
+	<Footer footerType="logo">
+		<FooterCopyright href="/" by="WordListGen" />
+	</Footer>
 </div>
 
 <style>
