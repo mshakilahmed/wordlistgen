@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chinese Text to WordList</title>
+  <script type="module" crossorigin src="/assets/index-b1ca4992.js"></script>
+  <link rel="stylesheet" href="/assets/index-2460beea.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  
+
+  <script>
+    async function setupPopupDict() {
+      let indexURL = "https://cdn.jsdelivr.net/pyodide/v0.23.3/full/";
+      let urlParams = new URLSearchParams(window.location.search);
+      let buildParam = urlParams.get("build");
+      if (buildParam) {
+        if (["full", "debug", "pyc"].includes(buildParam)) {
+          indexURL = indexURL.replace(
+            "/full/",
+            "/" + urlParams.get("build") + "/",
+          );
+        } else {
+          console.warn(
+            'Invalid URL parameter: build="' +
+            buildParam +
+            '". Using default "full".',
+          );
+        }
+      }
+
+      let { loadPyodide } = await import(indexURL + "pyodide.mjs");
+
+      globalThis.pyodide = await loadPyodide({
+        stdin: () => {
+          let result = prompt();
+          echo(result);
+          return result;
+        },
+      });
+
+      await pyodide.loadPackage(['micropip']);
+
+      await pyodide.runPython(`
+import asyncio
+import micropip
+async def install_pkgs():
+    await micropip.install('https://cdn.jsdelivr.net/gh/kryptoniancode/wordlistgen@latest/static/py-whl/jieba-0.42.1-py3-none-any.whl', keep_going=True)
+    await micropip.install('https://cdn.jsdelivr.net/gh/kryptoniancode/wordlistgen@latest/static/py-whl/pinyin_jyutping_sentence-1.3-py3-none-any.whl', keep_going=True)
+    await micropip.install('https://cdn.jsdelivr.net/gh/kryptoniancode/wordlistgen@latest/static/py-whl/chinese_english_lookup-0.0.3-py3-none-any.whl', keep_going=True)
+    await micropip.install('https://cdn.jsdelivr.net/gh/kryptoniancode/wordlistgen@latest/static/py-whl/colorize_pinyin-2.1.1-py3-none-any.whl', keep_going=True)
+    await micropip.install('https://cdn.jsdelivr.net/gh/kryptoniancode/wordlistgen@latest/static/py-whl/pinyin_tone_converter-1.0.2-py3-none-any.whl', keep_going=True)
+install_pkgs()
+    `);
+
+      await pyodide.runPython(`
+import js
+import jieba
+import colorize_pinyin
+from pinyin_tone_converter.pinyin_tone_converter import PinyinToneConverter as ptc
+from chinese_english_lookup import Dictionary
+d = Dictionary()
+print(d)
+    `);
+    }
+
+    setupPopupDict();
+  </script>
+</body>
+
+</html>

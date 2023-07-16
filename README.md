@@ -1,2 +1,0 @@
-# Paragraph to Wordlist Generator
-
